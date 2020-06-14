@@ -83,6 +83,16 @@ function handle_planes_get(data){
     }
 }
 
+function bindMarkerMessage(marker, message){
+    marker.bindPopup(message);
+    marker.on('mouseover', function (e) {
+        this.openPopup();
+    });
+    marker.on('mouseout', function (e) {
+        this.closePopup();
+    });
+}
+
 function handle_missions_get(planeids){
     return function(data){
         const result = $.csv.toArrays(data); // create array from csv
@@ -114,6 +124,9 @@ function handle_missions_get(planeids){
             }).addTo(the_map);
             const lineBetween = L.polyline([from_latlon, to_latlon]).addTo(the_map)
 
+            bindMarkerMessage(fromIcaoMarker, mission.fromIcao)
+            bindMarkerMessage(toIcaoMarker, mission.toIcao)
+
             on_map.push(fromIcaoMarker)
             on_map.push(toIcaoMarker)
             on_map.push(lineBetween)
@@ -132,7 +145,7 @@ function plot(){
     const plane = planes[$('#plane-select').val()];
     access = sanitizeString($('#input-access-key').val());    
 
-    if ( access.length != 10 && access.length != 16 ) {
+    if ( access.length != 10 && access.length != 16 && !mock ) {
         alert("Bad access token")
         return
     }
