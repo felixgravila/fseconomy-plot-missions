@@ -38,6 +38,12 @@ function handle_planes_get(data){
     const result = $.csv.toArrays(data); // create array from csv
     const header = result[0]
     const planes = result.slice(1) // remove header
+
+    if ( planes.length <= 1 ) {
+        alert("Something went wrong, possibly wrong access key. Please make sure it's correct.")
+        return
+    }
+
     console.log(`Got ${planes.length} planes`)
     planeIds = []
     locations = []
@@ -115,12 +121,20 @@ function handle_missions_get(planeids){
     }
 }
 
-
+function sanitizeString(str){
+    str = str.replace(/[^A-Z0-9]/g,"");
+    return str.trim();
+}
 
 function plot(){
 
     const plane = planes[$('#plane-select').val()];
-    access = $('#input-access-key').val();
+    access = sanitizeString($('#input-access-key').val());    
+
+    if ( access.length != 10 ) {
+        alert("Bad access token")
+        return
+    }
 
     const plane_get_url = encodeURI(`https://server.fseconomy.net/data?userkey=${access}&format=csv&query=aircraft&search=makemodel&makemodel=${plane}`)
     console.log(`getting ${plane_get_url}`);
