@@ -4,20 +4,156 @@ for(idx in planes){
     $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
 }
 
+// If should use saved example csvs for testing
+const mock = false
+
 let map_initialised = false;
 let the_map;
+let on_map = [];
+let access;
+const icaodata = new Map();
 
-function plot(){
-    const plane = planes[$('#plane-select').val()];
-    const access = $('#input-access-key').val();
-    console.log("PLOTTING", access, plane);
+$.ajax({
+    url: 'icaodata_small.csv',
+    type: 'GET',
+    success: function(data){
+        let result = $.csv.toArrays(data);
+        result = result.slice(1)
+        for (airp of result) {
+            icaodata[airp[0]] = [parseFloat(airp[1]), parseFloat(airp[2])]
+        }
+    },
+    error: handle_ajax_err
+});
 
-    if(!map_initialised){
-        initialise_map()
+
+const proxy = 'https://cors-anywhere.herokuapp.com/';
+
+function handle_ajax_err(xhr, status){
+    console.log(xhr);
+    console.log(status);
+}
+
+function handle_planes_get(data){
+    const result = $.csv.toArrays(data); // create array from csv
+    const header = result[0]
+    const planes = result.slice(1) // remove header
+    console.log(`Got ${planes.length} planes`)
+    planeIds = []
+    locations = []
+    for (p of planes){
+        const pid = parseInt(p[header.indexOf("SerialNumber")]);
+        const loc = p[header.indexOf("Location")];
+        if ( pid && loc && loc.length == 4 ) {
+            planeIds.push(pid)
+            if ( locations.indexOf(loc) < 0 ) {
+                locations.push(loc)
+            }
+        }
     }
 
+    console.log(`${locations.length} unique ICAOs`)
+
+    const joined_locs = locations.join("-")
     
+    icaos_url = encodeURI(`https://server.fseconomy.net/data?userkey=${access}&format=csv&query=icao&search=jobsfrom&icaos=${joined_locs}`)    
+    console.log(`getting ${icaos_url}`);
+    
+    if (mock){
+        $.ajax({
+            url: 'test_data/icao.csv',
+            type: 'GET',
+            success: handle_missions_get(planeIds),
+            error: handle_ajax_err
+        });
+    } else {
+        $.ajax({
+            url: proxy+icaos_url,
+            type: 'GET',
+            success: handle_missions_get(planeIds),
+            error: handle_ajax_err
+        });
+    }
 }
+
+function handle_missions_get(planeids){
+    return function(data){
+        const result = $.csv.toArrays(data); // create array from csv
+        const header = result[0]
+        const all_missions = result.slice(1);
+        console.log(`Got ${all_missions.length} total missions from the airports`)
+
+        const missions = []
+        for ( m of all_missions ) {
+            let m_pid = parseInt(m[header.indexOf("AircraftId")])
+            if ( m_pid && planeids.indexOf(m_pid) >= 0 ) {
+                missions.push({"fromIcao": m[header.indexOf("FromIcao")], "toIcao": m[header.indexOf("ToIcao")]}) // FromICAO, ToICAO
+            }
+            
+        }
+
+        console.log(`${missions.length} relevant missions found`);
+
+        for (mission of missions) {
+            from_latlon = icaodata[mission.fromIcao]
+            to_latlon = icaodata[mission.toIcao]
+            const fromIcaoMarker = L.circleMarker(from_latlon, {
+                color: 'green',
+                radius: '3'
+            }).addTo(the_map);
+            const toIcaoMarker = L.circleMarker(to_latlon, {
+                color: 'red',
+                radius: '4'
+            }).addTo(the_map);
+            const lineBetween = L.polyline([from_latlon, to_latlon]).addTo(the_map)
+
+            on_map.push(fromIcaoMarker)
+            on_map.push(toIcaoMarker)
+            on_map.push(lineBetween)
+
+        }
+    }
+}
+
+
+
+function plot(){
+
+    const plane = planes[$('#plane-select').val()];
+    access = $('#input-access-key').val();
+
+    const plane_get_url = encodeURI(`https://server.fseconomy.net/data?userkey=${access}&format=csv&query=aircraft&search=makemodel&makemodel=${plane}`)
+    console.log(`getting ${plane_get_url}`);
+
+    if(!map_initialised){
+        initialise_map();
+    }
+
+    for (l of on_map){
+        the_map.removeLayer(l)
+    }
+    on_map = []
+    
+    if (mock) {
+        $.ajax({
+            url: 'test_data/aircraft.csv',
+            type: 'GET',
+            success: handle_planes_get,
+            error: handle_ajax_err
+        });
+    } else {
+        $.ajax({
+            url: proxy+plane_get_url,
+            type: 'GET',
+            success: handle_planes_get,
+            error: handle_ajax_err
+        });
+    }
+
+
+}
+
+
 
 function transitionOpen(){
     $("#map-jumbo").addClass("transition")
@@ -56,7 +192,7 @@ function initialise_map(){
         attribution: 'Map data ©2020 Google'
     });
 
-    the_map.addLayer(mapbox)
+    the_map.addLayer(mapbox);
 
     var baseMaps = {
         "Mapbox": mapbox,
@@ -65,9 +201,9 @@ function initialise_map(){
         "Google Terrain": googleTerrain
     };
 
-    L.control.layers(baseMaps).addTo(the_map)
+    L.control.layers(baseMaps).addTo(the_map);
 
-    $("#map-jumbo").addClass("init")
-    window.setTimeout(transitionOpen, 100)
+    $("#map-jumbo").addClass("init");
+    window.setTimeout(transitionOpen, 100);
 
 }
