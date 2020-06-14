@@ -1,5 +1,6 @@
 
-const planes = ['Boeing 737-800', 'Boeing 747-400', 'Airbus A320', 'Airbus A321']
+const planes = ['Boeing 737-800', 'Boeing 747-400', 'Airbus A320', 'Airbus A321', 'Boeing 727-100/200']
+planes.sort()
 for(idx in planes){
     $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
 }
