@@ -22,23 +22,27 @@
 		<a class="navbar-brand" href="#">FSEconomy All-In Mission Plotter</a>
 	</nav>
 
-	<div class="modal" tabindex="-1" role="dialog">
-		<div class="modal-dialog">
-		  <div class="modal-content">
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+		<div class="modal-content">
 			<div class="modal-header">
-			  <h5 class="modal-title">Access Key</h5>
-			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<h5 class="modal-title" id="exampleModalLabel">Why is your access key needed?</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
-			  </button>
+			</button>
 			</div>
 			<div class="modal-body">
 				<p>	This tool needs your FSEconomy access key in order to be able to request the relevant information.</p>
-				<p>The code is open source and runs in your browser, so your key is safe.</p>
+				<p>The code is open source and runs in your browser, so your key isn't sent anywhere. For technical reasons, an open-source <a href="https://cors-anywhere.herokuapp.com/">proxy</a> is used to enable the requests.</p>
 				<p>Get your access key from FSEconomy <a href="https://server.fseconomy.net/datafeeds.jsp">here</a>.</p>
 			</div>
-		  </div>
+			<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
 		</div>
-	  </div>
+		</div>
+	</div>
 
 	<div id="input" class="jumbotron centered">
 		<div class="input-group mb-3">
@@ -52,7 +56,13 @@
 			<select class="form-control" id="plane-select"></select>
 		</div>
 
-		<button id="btn-plot" type="button" class="btn btn-primary" onclick="plot()">Plot</button>
+		
+		<div class="btn-group">
+			<button id="btn-plot" type="button" class="btn btn-success mr-3" onclick="plot()">Plot</button>
+			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
+				Why the access key?
+			</button>
+		</div>
 
 	</div>
 
@@ -67,7 +77,11 @@
 	</div>
 
 	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script src="jquery.csv.min.js"></script>
+
 	<script src="code.js"></script>
 
 </body>
