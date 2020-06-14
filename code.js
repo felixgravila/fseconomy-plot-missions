@@ -1,5 +1,15 @@
 
-const planes = ['Boeing 737-800', 'Boeing 747-400', 'Airbus A320', 'Airbus A321', 'Boeing 727-100/200', 'Douglas DC-8 (10-40)', 'Douglas DC-6', 'McDonnell Douglas DC-10-30F']
+const planes = ['Boeing 737-800',
+	'Boeing 747-400',
+	'Airbus A320',
+	'Airbus A321',
+	'Boeing 727-100/200',
+	'Douglas DC-8 (10-40)',
+	'Douglas DC-6',
+	'McDonnell Douglas DC-10-30F',
+	'DeHavilland Dash 7',
+	'BAe 146-100 (Avro RJ70)',
+	'Bombardier Dash-8 Q400']
 
 planes.sort()
 for(idx in planes){
