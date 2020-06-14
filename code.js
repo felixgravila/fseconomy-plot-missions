@@ -132,7 +132,7 @@ function plot(){
     const plane = planes[$('#plane-select').val()];
     access = sanitizeString($('#input-access-key').val());    
 
-    if ( access.length != 10 ) {
+    if ( access.length != 10 && access.length != 16 ) {
         alert("Bad access token")
         return
     }
