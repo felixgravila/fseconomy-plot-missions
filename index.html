@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>FSEconomy All-In Mission Plotter</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+	<link rel="manifest" href="favicon/site.webmanifest">
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="#">FSEconomy All-In Mission Plotter</a>
+	</nav>
+
+	<div class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h5 class="modal-title">Access Key</h5>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			<div class="modal-body">
+				<p>	This tool needs your FSEconomy access key in order to be able to request the relevant information.</p>
+				<p>The code is open source and runs in your browser, so your key is safe.</p>
+				<p>Get your access key from FSEconomy <a href="https://server.fseconomy.net/datafeeds.jsp">here</a>.</p>
+			</div>
+		  </div>
+		</div>
+	  </div>
+
+	<div id="input" class="jumbotron centered">
+		<div class="input-group mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text">Access Key</span>
+			</div>
+			<input type="text" class="form-control" id="input-access-key">
+		</div>
+
+		<div class="form-group">
+			<select class="form-control" id="plane-select"></select>
+		</div>
+
+		<button id="btn-plot" type="button" class="btn btn-primary" onclick="plot()">Plot</button>
+
+	</div>
+
+	<div id="map-jumbo" class="jumbotron centered">
+		<div id="map"></div>
+	</div>
+
+
+
+	<div id="footer" class="text-center">
+		Code on <a href="https://github.com/felixgravila/fseconomy-plot-missions"><i class="fa fa-github" aria-hidden="true"></i> github</a>
+	</div>
+
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+	<script src="code.js"></script>
+
+</body>
+</html>
