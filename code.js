@@ -16,6 +16,9 @@ const planes = [
 function makeCookieMap(){
     // create a easy to use map of possibly existing cookies
     let cookieMap = {};
+    if ( document.cookie.length == 0 ) {
+        return {}
+    }
     for (c of document.cookie.split(";")){
         c = c.trim().split("=")
         if ( c[1].length > 0 ){
