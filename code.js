@@ -132,6 +132,10 @@ function bindMarkerMessage(marker, message){
     });
 }
 
+function onClickGotoFseconomy(marker, icao) {
+    marker.on('click', e => window.open(`https://server.fseconomy.net/airport.jsp?icao=${icao}`,'_blank'));
+}
+
 function handle_missions_get(planeids){
     return function(data){
         const result = $.csv.toArrays(data); // create array from csv
@@ -165,6 +169,9 @@ function handle_missions_get(planeids){
 
             bindMarkerMessage(fromIcaoMarker, mission.fromIcao)
             bindMarkerMessage(toIcaoMarker, mission.toIcao)
+
+            onClickGotoFseconomy(fromIcaoMarker, mission.fromIcao)
+            onClickGotoFseconomy(toIcaoMarker, mission.toIcao)
 
             on_map.push(fromIcaoMarker)
             on_map.push(toIcaoMarker)
