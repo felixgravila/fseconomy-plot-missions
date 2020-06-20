@@ -9,7 +9,7 @@ html,body{
 }
 
 div#input{
-    height: 200px;
+    height: 250px;
     padding-top:30px;
     margin-top: 20px;
     margin-bottom: 0px;
@@ -21,7 +21,7 @@ div#map{
 }
 
 div#map-jumbo{
-    height: calc(100% - 400px);
+    height: calc(100% - 450px);
     padding: 0px;
     margin-top: 20px;
     margin-bottom: 0px;

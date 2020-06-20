@@ -1,20 +1,48 @@
 
-const planes = ['Boeing 737-800',
-	'Boeing 747-400',
-	'Airbus A320',
-	'Airbus A321',
-	'Boeing 727-100/200',
-	'Douglas DC-8 (10-40)',
-	'Douglas DC-6',
-	'McDonnell Douglas DC-10-30F',
-	'DeHavilland Dash 7',
-	'BAe 146-100 (Avro RJ70)',
-	'Bombardier Dash-8 Q400']
+const planes = [
+    "Airbus A320",
+    "Airbus A321",
+    "BAe 146-100 (Avro RJ70)",
+    "Boeing 727-100/200",
+    "Boeing 737-800",
+    "Boeing 747-400",
+    "Bombardier Dash-8 Q400",
+    "DeHavilland Dash 7",
+    "Douglas DC-6",
+    "Douglas DC-8 (10-40)",
+    "McDonnell Douglas DC-10-30F"
+]
+
+// create a easy to use map of possibly existing cookies
+cookieMap = {};
+for (c of document.cookie.split(";")){
+    c = c.trim().split("=")
+    if ( c[1].length > 0 ){
+        cookieMap[c[0]] = c[1]
+    }
+}
 
 planes.sort()
 for(idx in planes){
     $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
 }
+
+// set plane if cookie
+if ( cookieMap["plane"] ) {
+    $('#plane-select').val(cookieMap["plane"])
+}
+
+// set access key if cookie
+if ( cookieMap["accesskey"] ) {
+    $('#input-access-key').val(cookieMap["accesskey"])
+}
+
+// set tickbox ticked if cookie
+if ( cookieMap["saveCookieTick"] ) {
+    $("#saveDataTick").prop("checked", true)
+}
+
+
 
 // If should use saved example csvs for testing
 const mock = false
@@ -153,8 +181,20 @@ function sanitizeString(str){
 
 function plot(){
 
-    const plane = planes[$('#plane-select').val()];
-    access = sanitizeString($('#input-access-key').val());    
+    const planeIdInList = $('#plane-select').val();
+    const plane = planes[planeIdInList];
+    access = sanitizeString($('#input-access-key').val());
+    const saveTheCookie = $("#saveDataTick").is(":checked")
+
+    if ( saveTheCookie ){
+        document.cookie = `plane=${planeIdInList}`;
+        document.cookie = `accesskey=${access}`;
+        document.cookie = 'saveCookieTick=true';
+    } else {
+        document.cookie = `plane=`;
+        document.cookie = `accesskey=`;
+        document.cookie = 'saveCookieTick=';
+    }
 
     if ( access.length != 10 && access.length != 16 && !mock ) {
         alert("Bad access token")
