@@ -13,14 +13,20 @@ const planes = [
     "McDonnell Douglas DC-10-30F"
 ]
 
-// create a easy to use map of possibly existing cookies
-cookieMap = {};
-for (c of document.cookie.split(";")){
-    c = c.trim().split("=")
-    if ( c[1].length > 0 ){
-        cookieMap[c[0]] = c[1]
+function makeCookieMap(){
+    // create a easy to use map of possibly existing cookies
+    let cookieMap = {};
+    for (c of document.cookie.split(";")){
+        c = c.trim().split("=")
+        if ( c[1].length > 0 ){
+            cookieMap[c[0]] = c[1]
+        }
     }
+    return cookieMap;
 }
+
+let cookieMap = makeCookieMap();
+
 
 planes.sort()
 for(idx in planes){
@@ -40,6 +46,13 @@ if ( cookieMap["accesskey"] ) {
 // set tickbox ticked if cookie
 if ( cookieMap["saveCookieTick"] ) {
     $("#saveDataTick").prop("checked", true)
+}
+
+// warn on remove tick that cookies will be deleted
+function tickBoxTicked(){
+    if ( cookieMap["saveCookieTick"] && !$("#saveDataTick").is(":checked") ) {
+        alert("All cookies will be removed on next plot if box is left unticked.")
+    }
 }
 
 
@@ -190,10 +203,12 @@ function plot(){
         document.cookie = `plane=${planeIdInList}`;
         document.cookie = `accesskey=${access}`;
         document.cookie = 'saveCookieTick=true';
+        cookieMap = makeCookieMap()
     } else {
         document.cookie = `plane=`;
         document.cookie = `accesskey=`;
         document.cookie = 'saveCookieTick=';
+        cookieMap = makeCookieMap()
     }
 
     if ( access.length != 10 && access.length != 16 && !mock ) {
