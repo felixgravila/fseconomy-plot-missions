@@ -10,6 +10,6 @@ Nothing to install, just point your server to the directory
 
 ## Screenshots
 
-![ScreenShot](/screenshots/example_map.png)
+![Map mode](/screenshots/example_map.png)
 
-![ScreenShot](/screenshots/example_table.png)
+![Table mode](/screenshots/example_table.png)
