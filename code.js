@@ -13,52 +13,20 @@ const planes = [
     "McDonnell Douglas DC-10-30F"
 ]
 
-// create a easy to use map of possibly existing cookies
-function makeCookieMap(){
-    let cookieMap = {};
-    if ( document.cookie.length == 0 ) {
-        return {}
+// main function called on document load
+function initAll(){
+
+    // sort the plane list so they're always in alphabetical order
+    planes.sort()
+    for(idx in planes){
+        $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
     }
-    for (c of document.cookie.split(";")){
-        c = c.trim().split("=")
-        if ( c[1].length > 0 ){
-            cookieMap[c[0]] = c[1]
-        }
-    }
-    return cookieMap;
+
+    // initialise cookies AFTER list is initialised
+    cookieInitialise();
+
 }
 
-// initialise the cookie map
-let cookieMap = makeCookieMap();
-
-// sort the plane list so they're always in alphabetical order
-planes.sort()
-for(idx in planes){
-    $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
-}
-
-// set last used plane in list if cookie
-if ( cookieMap["plane"] ) {
-    $('#plane-select').val(cookieMap["plane"])
-}
-
-// set access key if cookie
-if ( cookieMap["accesskey"] ) {
-    $('#input-access-key').val(cookieMap["accesskey"])
-}
-
-// set tickbox ticked if cookie
-if ( cookieMap["saveCookieTick"] ) {
-    $("#saveDataTick").prop("checked", true)
-}
-
-// warn on remove tick that cookies will be deleted
-// only if cookies already exist
-function tickBoxTicked(){
-    if ( cookieMap["saveCookieTick"] && !$("#saveDataTick").is(":checked") ) {
-        alert("All cookies will be removed on next plot if box is left unticked.")
-    }
-}
 
 
 
@@ -108,15 +76,13 @@ function plot(){
     // handle cookies if tickbox ticked
     // or clear cookies
     if ( saveTheCookie ){
-        document.cookie = `plane=${planeIdInList}`;
-        document.cookie = `accesskey=${access}`;
-        document.cookie = 'saveCookieTick=true';
-        cookieMap = makeCookieMap()
+        saveCookie(cookieListPlane, planeIdInList);
+        saveCookie(cookieAccessKey, access)
+        saveCookie(cookieSaveTick, true)
     } else {
-        document.cookie = `plane=`;
-        document.cookie = `accesskey=`;
-        document.cookie = 'saveCookieTick=';
-        cookieMap = makeCookieMap()
+        clearCookie(cookieListPlane)
+        clearCookie(cookieAccessKey)
+        clearCookie(cookieSaveTick)
     }
 
     // verify access key length is 10 (old version) or 16
@@ -359,3 +325,5 @@ function initialise_map(){
     window.setTimeout(transitionOpen, 100);
 
 }
+
+$(document).ready(initAll)

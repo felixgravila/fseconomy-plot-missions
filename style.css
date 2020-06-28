@@ -20,6 +20,13 @@ div#map{
     width: 100%;
 }
 
+div#table{
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    overflow: scroll;
+}
+
 div#map-jumbo{
     height: calc(100% - 450px);
     padding: 0px;
