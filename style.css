@@ -78,6 +78,7 @@ div#map-jumbo.init.expanded{
 
 table, th, td {
     border: 1px solid black;
+    table-layout: fixed;
 }
 
 #mission-table tr th {

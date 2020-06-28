@@ -417,7 +417,15 @@ function addRowsToTable(){
     // add header to table with arrow to show sorting
     tr_string = "<tr>"
     for (key in tableColsAndValueKeys) {
-        tr_string = tr_string + `<th onclick='sortTable("${key}")'>${key}</th>`
+        tr_string = tr_string + `<th onclick='sortTable("${key}")'>${key} `
+        if ( key == sortByKey ) {
+            if ( sortByDesc ) {
+                tr_string  = tr_string + '<i class="fa fa-caret-down" aria-hidden="true"></i>'
+            } else {
+                tr_string  = tr_string + '<i class="fa fa-caret-up" aria-hidden="true"></i>'
+            }
+        }
+        tr_string = tr_string + `</th>`
     }
     tr_string = tr_string + "</tr>"
     $("#mission-table").append(tr_string)
