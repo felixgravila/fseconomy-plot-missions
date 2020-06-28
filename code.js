@@ -379,9 +379,8 @@ function initialise_map(){
 
 }
 
+// handles the logic of sorting ascending/descending on click
 function sortTable(key){
-    console.log(`Sort by ${key}`);
-    
     // if already same sorting swap asc desc
     if ( sortByKey == key ) {
         sortByDesc = !sortByDesc;
@@ -398,10 +397,9 @@ function sortTable(key){
     addRowsToTable()
 }
 
+// function that performs the table refresh
 function addRowsToTable(){   
-    
-    console.log("Adding rows... ")
-    
+
     // sort the missions
 
     // Use cookie if exists

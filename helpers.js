@@ -55,7 +55,6 @@ function getDistance(origin, destination) {
 
 // returns closure that sorts list by key
 function sorterBy(key, desc){
-    console.log("Sorter by ", key, desc)
     return function(a,b) {
         r = 1
         if ( b[key] > a[key] ) {
