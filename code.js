@@ -65,7 +65,7 @@ let on_map = [];
 let missions = [];
 let access;
 let sortByKey = "From";
-let sortByDesc = true;
+let sortByDesc = false;
 const icaodata = new Map();
 
 // load the icao data and form dictionary
@@ -387,7 +387,7 @@ function sortTable(key){
         sortByDesc = !sortByDesc;
     } else {
         sortByKey = key;
-        sortByDesc = true;
+        sortByDesc = false;
     }
 
     // save the cookie if allowed

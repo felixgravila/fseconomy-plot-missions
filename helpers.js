@@ -57,10 +57,13 @@ function getDistance(origin, destination) {
 function sorterBy(key, desc){
     console.log("Sorter by ", key, desc)
     return function(a,b) {
-        if ( desc ) {
-            return b[key] - a[key]
-        } else {
-            return a[key] - b[key]
+        r = 1
+        if ( b[key] > a[key] ) {
+            r = -1
         }
+        if ( desc ) {
+            r *= -1
+        }
+        return r
     }
 }
