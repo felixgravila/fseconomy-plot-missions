@@ -13,53 +13,47 @@ const planes = [
     "McDonnell Douglas DC-10-30F"
 ]
 
-// create a easy to use map of possibly existing cookies
-function makeCookieMap(){
-    let cookieMap = {};
-    if ( document.cookie.length == 0 ) {
-        return {}
+tableColsAndValueKeys = {
+    "From": "fromIcao",
+    "To": "toIcao",
+    "Distance": "distance",
+    "Pay": "pay"
+}
+
+// main function called on document load
+function initAll(){
+
+    // sort the plane list so they're always in alphabetical order
+    planes.sort()
+    for(idx in planes){
+        $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
     }
-    for (c of document.cookie.split(";")){
-        c = c.trim().split("=")
-        if ( c[1].length > 0 ){
-            cookieMap[c[0]] = c[1]
-        }
-    }
-    return cookieMap;
+
+    // initialise cookies AFTER list is initialised
+    cookieInitialise();
+
 }
 
-// initialise the cookie map
-let cookieMap = makeCookieMap();
+// function that handles changing between map and table
+function swapMapTable(button){
+    // if already selected don't do anything
+    if ( isMapButtonSelected() && button === "map" ) {return;}
+    if ( !isMapButtonSelected() && button === "table" ) {return;}
 
-// sort the plane list so they're always in alphabetical order
-planes.sort()
-for(idx in planes){
-    $('#plane-select').append(`<option value="${idx}">${planes[idx]}</option>`)
-}
+    // change the hihglight
+    setMapOrTableButtons(button)
 
-// set last used plane in list if cookie
-if ( cookieMap["plane"] ) {
-    $('#plane-select').val(cookieMap["plane"])
-}
+    // remove min and max from table
+    removeModifiersMapTable()
 
-// set access key if cookie
-if ( cookieMap["accesskey"] ) {
-    $('#input-access-key').val(cookieMap["accesskey"])
-}
-
-// set tickbox ticked if cookie
-if ( cookieMap["saveCookieTick"] ) {
-    $("#saveDataTick").prop("checked", true)
-}
-
-// warn on remove tick that cookies will be deleted
-// only if cookies already exist
-function tickBoxTicked(){
-    if ( cookieMap["saveCookieTick"] && !$("#saveDataTick").is(":checked") ) {
-        alert("All cookies will be removed on next plot if box is left unticked.")
+    if ( button === "map" ) {
+        $("#map").addClass("maximised");
+        $("#table").addClass("minimised");
+    } else {
+        $("#map").addClass("minimised");
+        $("#table").addClass("maximised");
     }
 }
-
 
 
 // If should use saved example csvs for testing
@@ -68,7 +62,10 @@ const mock = false
 let map_initialised = false;
 let the_map;
 let on_map = [];
+let missions = [];
 let access;
+let sortByKey = "From";
+let sortByDesc = false;
 const icaodata = new Map();
 
 // load the icao data and form dictionary
@@ -108,15 +105,13 @@ function plot(){
     // handle cookies if tickbox ticked
     // or clear cookies
     if ( saveTheCookie ){
-        document.cookie = `plane=${planeIdInList}`;
-        document.cookie = `accesskey=${access}`;
-        document.cookie = 'saveCookieTick=true';
-        cookieMap = makeCookieMap()
+        saveCookie(cookieListPlane, planeIdInList);
+        saveCookie(cookieAccessKey, access)
+        saveCookie(cookieSaveTick, true)
     } else {
-        document.cookie = `plane=`;
-        document.cookie = `accesskey=`;
-        document.cookie = 'saveCookieTick=';
-        cookieMap = makeCookieMap()
+        clearCookie(cookieListPlane)
+        clearCookie(cookieAccessKey)
+        clearCookie(cookieSaveTick)
     }
 
     // verify access key length is 10 (old version) or 16
@@ -157,6 +152,10 @@ function plot(){
             error: handle_ajax_err
         });
     }
+
+    // show buttons
+    $("#btn-show-map").removeClass("hidden")
+    $("#btn-show-table").removeClass("hidden")
 }
 
 // function executed after plane request returns
@@ -228,34 +227,49 @@ function handle_missions_get(planeids){
 
         // create list of missions with From and To ICAOs by iterating over the result
         // and checking which missions have the AircraftId field in planeids
-        const missions = []
+        missions = []
         for ( m of all_missions ) {
             let m_pid = parseInt(m[header.indexOf("AircraftId")])
             if ( m_pid && planeids.indexOf(m_pid) >= 0 ) {
-                missions.push({"fromIcao": m[header.indexOf("FromIcao")], "toIcao": m[header.indexOf("ToIcao")]}) // FromICAO, ToICAO
+
+                fromIcao = m[header.indexOf("FromIcao")];
+                toIcao = m[header.indexOf("ToIcao")];
+
+                // get latlons from icaodata
+                from_latlon = icaodata[fromIcao];
+                to_latlon = icaodata[toIcao];
+
+                missions.push({
+                    "fromIcao": fromIcao,
+                    "toIcao": toIcao,
+                    "fromLatLon": from_latlon,
+                    "toLatLon": to_latlon,
+                    "distance": getDistance(from_latlon, to_latlon),
+                    "pay": m[header.indexOf("Pay")]
+                })
             }  
         }
 
         console.log(`${missions.length} relevant missions found`);
 
-        // plot the missions on the map
+        // plot the missions on the map and add them to the table
         for (mission of missions) {
-            // get latlons from icaodata
-            from_latlon = icaodata[mission.fromIcao]
-            to_latlon = icaodata[mission.toIcao]
+
+            // first plot to map
+
             // green circle marker for From
-            const fromIcaoMarker = L.circleMarker(from_latlon, {
+            const fromIcaoMarker = L.circleMarker(mission.fromLatLon, {
                 color: 'green',
                 radius: '5',
                 zIndex: 100
             }).addTo(the_map);
             // smaller red circle marker on top of the green one for To
-            const toIcaoMarker = L.circleMarker(to_latlon, {
+            const toIcaoMarker = L.circleMarker(mission.toLatLon, {
                 color: 'red',
                 radius: '3',
                 zIndex: 101
             }).addTo(the_map);
-            const lineBetween = L.polyline([from_latlon, to_latlon], {zIndex: 50}).addTo(the_map)
+            const lineBetween = L.polyline([mission.fromLatLon, mission.toLatLon], {zIndex: 50}).addTo(the_map)
 
             // add popup with ICAO on mouse hover
             bindMarkerMessage(fromIcaoMarker, mission.fromIcao)
@@ -271,8 +285,13 @@ function handle_missions_get(planeids){
             on_map.push(lineBetween)
 
         }
+
+        // add the rows to table at the end
+        addRowsToTable()
     }
 }
+
+ 
 
 // function that binds the message to markers
 function bindMarkerMessage(marker, message){
@@ -359,3 +378,72 @@ function initialise_map(){
     window.setTimeout(transitionOpen, 100);
 
 }
+
+function sortTable(key){
+    console.log(`Sort by ${key}`);
+    
+    // if already same sorting swap asc desc
+    if ( sortByKey == key ) {
+        sortByDesc = !sortByDesc;
+    } else {
+        sortByKey = key;
+        sortByDesc = false;
+    }
+
+    // save the cookie if allowed
+    if ( $("#saveDataTick").is(":checked") ) {
+        saveCookie(cookieFieldSorted, key)
+    }
+
+    addRowsToTable()
+}
+
+function addRowsToTable(){   
+    
+    console.log("Adding rows... ")
+    
+    // sort the missions
+
+    // Use cookie if exists
+    const sortByKeyCookie = makeCookieMap()[cookieFieldSorted];
+    if ( sortByKeyCookie ) {
+        sortByKey = sortByKeyCookie;
+    }
+    missions.sort(sorterBy(tableColsAndValueKeys[sortByKey], sortByDesc))
+
+    // clear table
+    $("#mission-table tr").remove()
+
+    // add header to table with arrow to show sorting
+    tr_string = "<tr>"
+    for (key in tableColsAndValueKeys) {
+        tr_string = tr_string + `<th onclick='sortTable("${key}")'>${key} `
+        if ( key == sortByKey ) {
+            if ( sortByDesc ) {
+                tr_string  = tr_string + '<i class="fa fa-caret-down" aria-hidden="true"></i>'
+            } else {
+                tr_string  = tr_string + '<i class="fa fa-caret-up" aria-hidden="true"></i>'
+            }
+        }
+        tr_string = tr_string + `</th>`
+    }
+    tr_string = tr_string + "</tr>"
+    $("#mission-table").append(tr_string)
+
+
+    // add lines to table
+    for ( mission of missions ) {
+        tr_string = `
+        <tr>
+        <td><a href="https://server.fseconomy.net/airport.jsp?icao=${mission[tableColsAndValueKeys['From']]}" target="_blank">${mission[tableColsAndValueKeys['From']]}</a></td>
+        <td><a href="https://server.fseconomy.net/airport.jsp?icao=${mission[tableColsAndValueKeys['To']]}" target="_blank">${mission[tableColsAndValueKeys['To']]}</a></td>
+        <td>${Math.round(mission[tableColsAndValueKeys['Distance']])} NM</td>
+        <td>\$${Math.round(mission[tableColsAndValueKeys['Pay']])}</td>
+        </tr>
+        `
+        $("#mission-table").append(tr_string)
+    }
+
+}
+
+$(document).ready(initAll)

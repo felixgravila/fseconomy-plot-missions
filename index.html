@@ -58,22 +58,31 @@
 
 		<div class="form-check">
 			<input type="checkbox" class="form-check-input" id="saveDataTick" onclick="tickBoxTicked()">
-			<label class="form-check-label" for="saveDataTick">Use a cookie to save your access key and plane in your browser for next time</label>
+			<label class="form-check-label" for="saveDataTick">Use a cookie to save your inputs for next time</label>
 		</div>
 
-	</br>
+		</br>
 		
+		<button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
+			Why the access key?
+		</button>
+
+		<button id="btn-plot" type="button" class="btn btn-success" onclick="plot()">Plot</button>
+
 		<div class="btn-group">
-			<button id="btn-plot" type="button" class="btn btn-success mr-3" onclick="plot()">Plot</button>
-			<button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
-				Why the access key?
+			<button id="btn-show-map" type="button" class="btn btn-success hidden" onclick="swapMapTable('map')">Map</button>
+			<button id="btn-show-table" type="button" class="btn btn-secondary hidden" onclick="swapMapTable('table')">Table</button>
 			</button>
-		</div>
+		</div> 
+
 
 	</div>
 
 	<div id="map-jumbo" class="jumbotron centered">
-		<div id="map"></div>
+		<div id="map" class="maximised transition"></div>
+		<div id="table" class="minimised transition">
+			<table id="mission-table"></table>
+		</div>
 	</div>
 
 
@@ -88,6 +97,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 	<script src="jquery.csv.min.js"></script>
 
+	<script src="helpers.js"></script>
+	<script src="cookieHelper.js"></script>
 	<script src="code.js"></script>
 
 </body>
