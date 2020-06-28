@@ -4,7 +4,6 @@
 const cookieListPlane = "plane";
 const cookieAccessKey = "accesskey";
 const cookieSaveTick = "saveCookieTick";
-const cookieIsMapMode = "isMapMode";
 const cookieFieldSorted = "fieldSorted";
 
 function cookieInitialise(){
@@ -45,16 +44,6 @@ function setParamsBasedOnCookies(){
     if ( cookieMap[cookieSaveTick] ) {
         $("#saveDataTick").prop("checked", true)
     }
-
-    // set map or table buttons
-    // defaults to map if undefined
-    if ( cookieMap[cookieIsMapMode] === false) {
-        setMapOrTableButtons("table")
-    } else {
-        // default map
-        setMapOrTableButtons("map")
-    }
-
 
 }
 

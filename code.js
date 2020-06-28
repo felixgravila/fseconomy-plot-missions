@@ -13,6 +13,13 @@ const planes = [
     "McDonnell Douglas DC-10-30F"
 ]
 
+tableColsAndValueKeys = {
+    "From": "fromIcao",
+    "To": "toIcao",
+    "Distance": "distance",
+    "Pay": "pay"
+}
+
 // main function called on document load
 function initAll(){
 
@@ -27,7 +34,26 @@ function initAll(){
 
 }
 
+// function that handles changing between map and table
+function swapMapTable(button){
+    // if already selected don't do anything
+    if ( isMapButtonSelected() && button === "map" ) {return;}
+    if ( !isMapButtonSelected() && button === "table" ) {return;}
 
+    // change the hihglight
+    setMapOrTableButtons(button)
+
+    // remove min and max from table
+    removeModifiersMapTable()
+
+    if ( button === "map" ) {
+        $("#map").addClass("maximised");
+        $("#table").addClass("minimised");
+    } else {
+        $("#map").addClass("minimised");
+        $("#table").addClass("maximised");
+    }
+}
 
 
 // If should use saved example csvs for testing
@@ -36,7 +62,10 @@ const mock = false
 let map_initialised = false;
 let the_map;
 let on_map = [];
+let missions = [];
 let access;
+let sortByKey = "From";
+let sortByDesc = true;
 const icaodata = new Map();
 
 // load the icao data and form dictionary
@@ -123,6 +152,10 @@ function plot(){
             error: handle_ajax_err
         });
     }
+
+    // show buttons
+    $("#btn-show-map").removeClass("hidden")
+    $("#btn-show-table").removeClass("hidden")
 }
 
 // function executed after plane request returns
@@ -194,34 +227,49 @@ function handle_missions_get(planeids){
 
         // create list of missions with From and To ICAOs by iterating over the result
         // and checking which missions have the AircraftId field in planeids
-        const missions = []
+        missions = []
         for ( m of all_missions ) {
             let m_pid = parseInt(m[header.indexOf("AircraftId")])
             if ( m_pid && planeids.indexOf(m_pid) >= 0 ) {
-                missions.push({"fromIcao": m[header.indexOf("FromIcao")], "toIcao": m[header.indexOf("ToIcao")]}) // FromICAO, ToICAO
+
+                fromIcao = m[header.indexOf("FromIcao")];
+                toIcao = m[header.indexOf("ToIcao")];
+
+                // get latlons from icaodata
+                from_latlon = icaodata[fromIcao];
+                to_latlon = icaodata[toIcao];
+
+                missions.push({
+                    "fromIcao": fromIcao,
+                    "toIcao": toIcao,
+                    "fromLatLon": from_latlon,
+                    "toLatLon": to_latlon,
+                    "distance": getDistance(from_latlon, to_latlon),
+                    "pay": m[header.indexOf("Pay")]
+                })
             }  
         }
 
         console.log(`${missions.length} relevant missions found`);
 
-        // plot the missions on the map
+        // plot the missions on the map and add them to the table
         for (mission of missions) {
-            // get latlons from icaodata
-            from_latlon = icaodata[mission.fromIcao]
-            to_latlon = icaodata[mission.toIcao]
+
+            // first plot to map
+
             // green circle marker for From
-            const fromIcaoMarker = L.circleMarker(from_latlon, {
+            const fromIcaoMarker = L.circleMarker(mission.fromLatLon, {
                 color: 'green',
                 radius: '5',
                 zIndex: 100
             }).addTo(the_map);
             // smaller red circle marker on top of the green one for To
-            const toIcaoMarker = L.circleMarker(to_latlon, {
+            const toIcaoMarker = L.circleMarker(mission.toLatLon, {
                 color: 'red',
                 radius: '3',
                 zIndex: 101
             }).addTo(the_map);
-            const lineBetween = L.polyline([from_latlon, to_latlon], {zIndex: 50}).addTo(the_map)
+            const lineBetween = L.polyline([mission.fromLatLon, mission.toLatLon], {zIndex: 50}).addTo(the_map)
 
             // add popup with ICAO on mouse hover
             bindMarkerMessage(fromIcaoMarker, mission.fromIcao)
@@ -237,8 +285,13 @@ function handle_missions_get(planeids){
             on_map.push(lineBetween)
 
         }
+
+        // add the rows to table at the end
+        addRowsToTable()
     }
 }
+
+ 
 
 // function that binds the message to markers
 function bindMarkerMessage(marker, message){
@@ -323,6 +376,65 @@ function initialise_map(){
     // timing trick for animation
     $("#map-jumbo").addClass("init");
     window.setTimeout(transitionOpen, 100);
+
+}
+
+function sortTable(key){
+    console.log(`Sort by ${key}`);
+    
+    // if already same sorting swap asc desc
+    if ( sortByKey == key ) {
+        sortByDesc = !sortByDesc;
+    } else {
+        sortByKey = key;
+        sortByDesc = true;
+    }
+
+    // save the cookie if allowed
+    if ( $("#saveDataTick").is(":checked") ) {
+        saveCookie(cookieFieldSorted, key)
+    }
+
+    addRowsToTable()
+}
+
+function addRowsToTable(){   
+    
+    console.log("Adding rows... ")
+    
+    // sort the missions
+
+    // Use cookie if exists
+    const sortByKeyCookie = makeCookieMap()[cookieFieldSorted];
+    if ( sortByKeyCookie ) {
+        sortByKey = sortByKeyCookie;
+    }
+    missions.sort(sorterBy(tableColsAndValueKeys[sortByKey], sortByDesc))
+
+    // clear table
+    $("#mission-table tr").remove()
+
+    // add header to table with arrow to show sorting
+    tr_string = "<tr>"
+    for (key in tableColsAndValueKeys) {
+        tr_string = tr_string + `<th onclick='sortTable("${key}")'>${key}</th>`
+    }
+    tr_string = tr_string + "</tr>"
+    $("#mission-table").append(tr_string)
+
+
+    // add lines to table
+    for ( mission of missions ) {
+        tr_string = `
+        <tr>
+        <td><a href="https://server.fseconomy.net/airport.jsp?icao=${mission[tableColsAndValueKeys['From']]}" target="_blank">${mission[tableColsAndValueKeys['From']]}</a></td>
+        <td><a href="https://server.fseconomy.net/airport.jsp?icao=${mission[tableColsAndValueKeys['To']]}" target="_blank">${mission[tableColsAndValueKeys['To']]}</a></td>
+        <td>${Math.round(mission[tableColsAndValueKeys['Distance']])} NM</td>
+        <td>\$${Math.round(mission[tableColsAndValueKeys['Pay']])}</td>
+        </tr>
+        `
+        $("#mission-table").append(tr_string)
+    }
 
 }
 
