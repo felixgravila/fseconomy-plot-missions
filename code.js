@@ -1,6 +1,7 @@
 
 const planes = [
     "Airbus A320",
+    "Airbus A320 (MSFS)",
     "Airbus A321",
     "BAe 146-100 (Avro RJ70)",
     "Boeing 727-100/200",
@@ -17,7 +18,8 @@ tableColsAndValueKeys = {
     "From": "fromIcao",
     "To": "toIcao",
     "Distance": "distance",
-    "Pay": "pay"
+    "Pay": "pay",
+    "$ per NM": "payPerNM"
 }
 
 // main function called on document load
@@ -239,13 +241,18 @@ function handle_missions_get(planeids){
                 from_latlon = icaodata[fromIcao];
                 to_latlon = icaodata[toIcao];
 
+                distance = getDistance(from_latlon, to_latlon);
+                pay = m[header.indexOf("Pay")];
+                payPerNM = (pay / distance).toFixed(2)
+
                 missions.push({
                     "fromIcao": fromIcao,
                     "toIcao": toIcao,
                     "fromLatLon": from_latlon,
                     "toLatLon": to_latlon,
-                    "distance": getDistance(from_latlon, to_latlon),
-                    "pay": m[header.indexOf("Pay")]
+                    "distance": distance,
+                    "pay": pay,
+                    "payPerNM":  payPerNM
                 })
             }  
         }
@@ -437,6 +444,7 @@ function addRowsToTable(){
         <td><a href="https://server.fseconomy.net/airport.jsp?icao=${mission[tableColsAndValueKeys['To']]}" target="_blank">${mission[tableColsAndValueKeys['To']]}</a></td>
         <td>${Math.round(mission[tableColsAndValueKeys['Distance']])} NM</td>
         <td>\$${Math.round(mission[tableColsAndValueKeys['Pay']])}</td>
+        <td>\$${ mission[tableColsAndValueKeys['$ per NM']] } </td>
         </tr>
         `
         $("#mission-table").append(tr_string)
