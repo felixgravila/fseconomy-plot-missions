@@ -1,6 +1,7 @@
 
 const planes = [
     "Airbus A320",
+    "Airbus A320 (MSFS)",
     "Airbus A321",
     "BAe 146-100 (Avro RJ70)",
     "Boeing 727-100/200",
