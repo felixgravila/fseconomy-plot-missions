@@ -67,7 +67,7 @@ function sorterBy(key, desc){
         }
 
         r = 1
-        if (i > j) {
+        if (i < j) {
             r = -1
         }
         if ( desc ) {
