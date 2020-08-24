@@ -56,8 +56,18 @@ function getDistance(origin, destination) {
 // returns closure that sorts list by key
 function sorterBy(key, desc){
     return function(a,b) {
+        // Put the relevant variables into i and j
+        i = a[key]
+        j = b[key]
+
+        // Convert i and j to numbers if they can be converted to them
+        if( !isNaN(i) && !isNaN(j) ) {
+            i = Number(i)
+            j = Number(j)
+        }
+
         r = 1
-        if ( b[key] > a[key] ) {
+        if (i > j) {
             r = -1
         }
         if ( desc ) {
