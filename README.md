@@ -2,7 +2,7 @@
 
 Finds and plots FSEconomy All-In missions on a map
 
-Live on [fseplot.gravila.dev](https://fseplot.gravila.dev/)
+Live on [fseplot.gravila.dev](https://fseplot.gravila.dev/) and [github pages](https://felixgravila.github.io/fseconomy-plot-missions/)
 
 ## Functionality
 
